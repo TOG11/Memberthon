@@ -216,7 +216,7 @@ async function initServer() {
             countdownAdditionsQueue.push(new SuperChat());
 
             if (chatItem.superchat.sticker != undefined)
-                AlertQueue.push(new Alert("SuperChatSticker", chatItem.author.name, chatItem.superchat.amount, addSuperChatAmount))
+                AlertQueue.push(new Alert("SuperChat", chatItem.author.name, chatItem.superchat.amount, addSuperChatAmount))
             else
                 AlertQueue.push(new Alert("SuperChat", chatItem.author.name, chatItem.superchat.amount, addSuperChatAmount))
 
