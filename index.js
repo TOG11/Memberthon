@@ -216,9 +216,9 @@ async function initServer() {
             countdownAdditionsQueue.push(new SuperChat());
 
             if (chatItem.superchat.sticker != - undefined)
-                AlertQueue.push(new Alert("SuperChatSticker", "chatItem.author7", "chatItem.superchat.amount", addSuperChatAmount))
+                AlertQueue.push(new Alert("SuperChatSticker", chatItem.author.name, chatItem.superchat.amount, addSuperChatAmount))
             else
-                AlertQueue.push(new Alert("SuperChat", chatItem.author, chatItem.superchat.amount, addSuperChatAmount))
+                AlertQueue.push(new Alert("SuperChat", chatItem.author.name, chatItem.superchat.amount, addSuperChatAmount))
 
             return;
         }
@@ -226,7 +226,7 @@ async function initServer() {
         if (chatItem.isMembership) {
             //print("Superchat: " + chatItem.superchat.amount);
             countdownAdditionsQueue.push(new Membership());
-            AlertQueue.push(new Alert("Membership", chatItem.author, 0, addSubAmount))
+            AlertQueue.push(new Alert("Membership", chatItem.author.name, 0, addSubAmount))
 
             return;
         }
