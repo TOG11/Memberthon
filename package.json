@@ -7,8 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Aiden C. Desjarlais",
+  "license": "MIT",
   "dependencies": {
     "chalk": "^4.1.2",
     "express": "^4.18.2",
