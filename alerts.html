@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Memberthon Setup</title>
+</head>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Fira+Sans&display=swap');
+
+    body,
+    html {
+        background-color: transparent;
+        color: white;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+    }
+
+    .outfit {
+        font-family: 'Outfit', sans-serif;
+    }
+
+    .field {
+        font-size: 30px;
+        border-radius: 12px;
+        padding: 6px;
+    }
+
+    .button {
+        font-size: 30px;
+        border-radius: 12px;
+        padding: 12px;
+        cursor: pointer;
+        transition: 240ms;
+    }
+
+    .button:hover {
+        font-size: 30px;
+        border-radius: 24px;
+        padding: 12px;
+        cursor: pointer;
+        transition: 240ms;
+    }
+
+    .button:active {
+        font-size: 28px;
+        border-radius: 24px;
+        padding: 12px;
+        cursor: pointer;
+        transition: 240ms;
+    }
+
+    .fira {
+        font-family: 'Fira Sans', sans-serif;
+    }
+
+    .title {
+        text-align: center;
+        background-color: rgba(0, 0, 0, 0.258);
+        padding: 12px;
+    }
+</style>
+<script>
+    var currentlyInList = []
+    var currentlyShown = []
+    window.onload = () => {
+        timerSocket = new WebSocket("ws://localhost:5653/ws/alerts");
+        timerSocket.onmessage = function (msg) {
+            const data = JSON.parse(msg.data);
+            data.forEach(alert => {
+
+                if (currentlyInList.find(a => a.alertID === alert.alertID)) return;
+
+                currentlyInList.push(alert);
+                currentlyShown = [currentlyInList[currentlyInList.length - 1], currentlyInList[currentlyInList.length - 2], currentlyInList[currentlyInList.length - 3]]
+            });
+        }
+
+        setInterval(() => {
+            document.getElementById('Title').innerHTML = "";
+            currentlyShown.forEach(alert => {
+                switch (alert.type) {
+                    case "SuperChatSticker":
+                        var string = `${alert.username} | ${alert.donation} Super Chat Sticker! +${alert.add}m`;
+                        document.getElementById('Title').innerHTML += string + "<br>";
+                        break;
+                    case "SuperChat":
+                        var string = `${alert.username} | ${alert.donation} Super Chat! +${alert.add}m`;
+                        document.getElementById('Title').innerHTML += string + "<br>";
+                        break;
+                    case "Membership":
+                        var string = `${alert.username} | Membership! +${alert.add}m`;
+                        document.getElementById('Title').innerHTML += string + "<br>";
+                        break;
+                }
+            })
+        }, 100);
+    }
+</script>
+
+<body>
+    <h1 id="Title" class="fira title"></h1>
+</body>
+
+</html>

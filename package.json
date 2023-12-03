@@ -1,0 +1,22 @@
+{
+  "name": "subathon-youtube-overlay",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "express": "^4.18.2",
+    "express-ws": "^5.0.2",
+    "open": "^9.1.0",
+    "pkg": "^5.8.1",
+    "scrape-yt": "^1.4.8",
+    "youtube-chat": "^2.2.0",
+    "youtubei": "^1.2.1"
+  }
+}
