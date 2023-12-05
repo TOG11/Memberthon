@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Memberthon Control</title>
+    <link rel="stylesheet" href="/styles/status">
+</head>
+<script>
+    var controlSocket = undefined;
+    window.onload = () => {
+        /* 
+        Status object (const data) is a large json object.
+        any data sent from the backend using "/ws/status => statusRequest"
+        will be included in this object
+        */
+        var ws = new WebSocket("ws://localhost:5653/ws/status");
+        ws.onopen = function () {
+            setInterval(() => {
+                ws.send("statusRequest")
+            }, 50)
+        };
+        ws.onmessage = function (msg) {
+            const data = JSON.parse(msg.data);
+            if (data.error) {
+                document.getElementById('error').innerHTML = "ERR! Details: " + data.details;
+            } else {
+                document.getElementById('online').innerHTML = data.online ? "SERVER STARTED & ONLINE!" : "IMPOSSIBLE ERR";
+                document.getElementById('madd').innerHTML = "Current Member Addition: " + data.member;
+                document.getElementById('sadd').innerHTML = "Current Superchat Addition: " + data.superchat;
+                document.getElementById('end').innerHTML = "Ending At: " + data.end;
+                document.getElementById('saving').innerHTML = "Config Saving?: " + data.isSaving;
+                document.getElementById('paused').innerHTML = "Paused?: " + data.isPaused;
+                document.getElementById('stream').innerHTML = "Livestream: <a href=\"https://www.youtube.com/watch?v=" + data.liveID + "\">" + data.liveID + "</a>";
+
+                document.getElementById('memberadd').value = data.member;
+                document.getElementById('superchatadd').value = data.superchat;
+                document.getElementById('enddate').value = data.enddate.replace("Z", "");
+            }
+        }
+
+        /* 
+        send control requests to this socket using the following template:
+
+        controlSocket.send(JSON.stringify({ request: "MyCustomRequest", value: "My Value" }))
+
+        see "/ws/control" in the backend for how to process it.
+
+        */
+        controlSocket = new WebSocket("ws://localhost:5653/ws/control");
+        controlSocket.onmessage = function (msg) {
+            const data = JSON.parse(msg.data);
+        }
+    }
+
+    function UpdateMemberAdd(e) {
+        controlSocket.send(JSON.stringify({ request: "UpdateMemberAdd", value: e.value }))
+    }
+
+    function UpdateSuperChatAdd(e) {
+        controlSocket.send(JSON.stringify({ request: "UpdateSuperChatAdd", value: e.value }))
+    }
+
+    function UpdateEndDate(e) {
+        controlSocket.send(JSON.stringify({ request: "UpdateEndDate", value: e.value }))
+    }
+
+    function SaveConfig() {
+        controlSocket.send(JSON.stringify({ request: "SaveConfig" }))
+    }
+
+    function PauseResume() {
+        controlSocket.send(JSON.stringify({ request: "PauseResume" }))
+    }
+
+    function NewLiveID(e) {
+        var id = new URLSearchParams(e.value.replace("?", "&"));
+        controlSocket.send(JSON.stringify({ request: "NewLiveID", value: id.get("v") }))
+    }
+
+</script>
+
+<body>
+    <br> <br>
+    <h1 class="outfit">Memberthon Status & Control</h1>
+    <h3 class="outfit"><b><i>Created By Togi</i></b></h3>
+    <br> <br>
+    <br> <br>
+    <input class="button" value="Timer Page (for OBS)" type="text" onclick="window.location.href='/overlay'">
+    <br> <br>
+    <input class="button" value="Alerts Page (for OBS)" type="text" onclick="window.location.href='/alerts'">
+    <br>
+    <!-- Start Status Page -->
+    <h3 id="error" class="red outfit medium"></h3>
+    <h3 id="online" class="green outfit medium"></h3>
+    <h3 id="saving" class="outfit medium"></h3>
+    <h3 id="paused" class="outfit medium"></h3>
+    <h3 id="stream" class="outfit medium"></h3>
+    <h3 class="outfit small">to access the stream URL, right click, and open in a new tab</h3>
+
+
+    <h3 id="madd" class="outfit medium"></h3>
+    <h3 id="sadd" class="outfit medium"></h3>
+    <h3 id="end" class="outfit small"></h3>
+
+    <br><br>
+    <h1 class="outfit"><span class="red">!LIVE!</span> Control</h1>
+    <h2 class="outfit">Membership Addition Time (mins):<br></h2>
+    <input id="memberadd" class="field" type="number" min="1" placeholder="5" oninput="UpdateMemberAdd(this)">
+    <br> <br>
+    <h2 class="outfit">Superchat Addition Time (mins):<br></h2>
+    <input id="superchatadd" class="field" type="number" min="1" placeholder="10" oninput="UpdateSuperChatAdd(this)">
+    <br> <br>
+    <h2 class="outfit">End Date & Time:<br></h2>
+    <input id="enddate" class="field" type="datetime-local" oninput="UpdateEndDate(this)">
+    <br> <br>
+    <h2 class="outfit">Save Config:<br></h2>
+    <input id="save" class="button medium" type="button" value="Save Config" onclick="SaveConfig()">
+    <br> <br>
+    <h2 class="outfit">Pause/Resume:<br></h2>
+    <h4 class="outfit red">THIS WILL NOT PAUSE THE TIMER. IT WILL PAUSE SUPERCHAT AND MEMBER TIME INCREASES.</h4>
+    <input id="pause" class="button medium" type="button" value="Pause/Resume" onclick="PauseResume()">
+    <br> <br>
+    <h2 class="outfit">New Live Video:<br></h2>
+    <h4 class="outfit red">THIS REQUIRES A BACKEND SERVER RESTART ONCE INPUTTED.</h4>
+    <input id="liveid" class="field" type="text" placeholder="New Livestream URL" oninput="NewLiveID(this)">
+    <br> <br>
+
+    <br> <br>
+
+    <br> <br>
+</body>
+
+</html>

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Memberthon Timer</title>
+    <link rel="stylesheet" href="/styles/overlay">
+</head>
+<script>
+    window.onload = () => {
+
+        timerSocket = new WebSocket("ws://localhost:5653/ws/timer");
+        timerSocket.onmessage = function (msg) {
+            document.getElementById('Title').innerHTML = msg.data;
+
+        }
+    }
+</script>
+
+<body>
+    <h1 id="Title" class="fira title"></h1>
+</body>
+
+</html>

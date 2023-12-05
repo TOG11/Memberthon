@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Memberthon Alerts</title>
+    <link rel="stylesheet" href="/styles/alerts">
+</head>
+<script>
+    var currentlyInList = []
+    var currentlyShown = []
+    window.onload = () => {
+        timerSocket = new WebSocket("ws://localhost:5653/ws/alerts");
+        timerSocket.onmessage = function (msg) {
+            const data = JSON.parse(msg.data);
+            data.forEach(alert => {
+                if (currentlyInList.find(a => a.alertID === alert.alertID)) return;
+
+                currentlyInList.push(alert);
+                currentlyShown = [currentlyInList[currentlyInList.length - 1], currentlyInList[currentlyInList.length - 2], currentlyInList[currentlyInList.length - 3]]
+            });
+        }
+
+        setInterval(() => {
+            document.getElementById('Title').innerHTML = "";
+            currentlyShown.forEach(alert => {
+                // any custom alerts will come out from here as the "alert" object!
+                // make sure you add support for their type here too!
+                /* 
+                DEVS NOTE: alert.donation doesnt need to be provided.
+
+
+                    Template:
+                        case "CustomAlert":
+                            var string = `${alert.username} | Custom Alert! +${alert.add}m`;
+                            document.getElementById('Title').innerHTML += string + "<br>";
+                            break;
+                */
+                switch (alert.type) {
+                    case "SuperChatSticker":
+                        var string = `${alert.username} | ${alert.donation} Super Chat Sticker! +${alert.add}m`;
+                        document.getElementById('Title').innerHTML += string + "<br>";
+                        break;
+                    case "SuperChat":
+                        //uses alert.donation
+                        var string = `${alert.username} | ${alert.donation} Super Chat! +${alert.add}m`;
+                        document.getElementById('Title').innerHTML += string + "<br>";
+                        break;
+                    case "Membership":
+                        // doesnt use alert.donation
+                        var string = `${alert.username} | Membership! +${alert.add}m`;
+                        document.getElementById('Title').innerHTML += string + "<br>";
+                        break;
+                }
+            })
+        }, 100);
+    }
+</script>
+
+<body>
+    <h1 id="Title" class="fira title"></h1>
+</body>
+
+</html>

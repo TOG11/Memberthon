@@ -1,11 +1,23 @@
 // Aiden C. Desjarlais (C) 2023
 //     LICENSED UNDER MIT
-const OPEN_PAGE = true; //will not open your default browser.
+
+/* 
+This app was made for contribution! Feel free to post a pull request with added features!
+You'll find information for developing in comments below, happy programming!
+*/
+
+//Developer Vars
+const OPEN_PAGE = true; //will open your default browser if true.
 const LOAD_SAVE = true; //keep off to manually set the channel each time on load
 const TESTING = false; //will enable 4 test donations of diffrent types.
+
 const fs = require('fs');
 const { LiveChat } = require("youtube-chat");
+
+// our lord and saviour print()
 const print = console.log;
+// yes. This print method is necessary for convenience. ;)
+
 const bodyParser = require('body-parser');
 const app = require('express')();
 var expressWs = require('express-ws')(app);
@@ -13,16 +25,25 @@ const path = require('path');
 const { randomUUID } = require('crypto');
 const chalk = require('chalk');
 app.use(bodyParser.urlencoded({ extended: true }));
-var loaded = false;
-var saving = false;
-var paused = false;
+
+var loaded = false; // true if save is loaded
+var saving = false; // true if saving
+var paused = false; // true if time increases paused
 var addSubAmount = 0; // in minutes
 var addSuperChatAmount = 0; // in minutes
 var setMinutesTestAmount = 1; // in minutes
+
+/* 
+These are increase types, they are empty classes used to increase the timer.
+You can create your own, however make sure you provide logic for it within
+StartCountdown() and initServer() !
+Push the type to the countdownAdditionsQueue to add it to the queue.
+*/
 class Membership { }
 class SuperChat { }
 class Chat { } // push this for testing, with each chat time increases by the testing amount.
-print(chalk.blueBright("Starting " + chalk.greenBright('MEMBERTHON') + " By Togi " + chalk.blue("https://tog1.me")));
+
+print(chalk.blueBright("Starting " + chalk.greenBright('MEMBERTHON') + " By Aiden C. Desjarlais " + chalk.blue("https://aidendes.com")));
 
 //get overlay status
 app.ws('/ws/status', function (ws, req) {
@@ -32,6 +53,7 @@ app.ws('/ws/status', function (ws, req) {
                 if (failedStart)
                     ws.send(JSON.stringify({ details: failiureDetails, error: true }));
                 else {
+                    //add a new object to this json object to receive it on the status page.
                     ws.send(JSON.stringify({ error: false, online: true, member: addSubAmount, superchat: addSuperChatAmount, end: countDownDate.toString(), enddate: countDownDate.toISOString(), isSaving: saving, isPaused: paused, liveID: LiveID }));
                 }
                 break;
@@ -45,6 +67,12 @@ app.ws('/ws/timer', function (ws, req) {
     }, 250)
 });
 
+
+/* 
+this is the base class for any alert. Its used to send information to the front end.
+Feel free to create your own. To send it to the front end alert page, push it to the
+AlertQueue array, and deal with the logic front end. (see alert.html for template logic)
+*/
 class Alert {
     type = undefined;
     username = undefined;
@@ -63,25 +91,25 @@ class Alert {
 var AlertQueue = []
 if (TESTING) {
     print(chalk.red("APP IS IN TESTING MODE"));
-setTimeout(() => {
-    AlertQueue.push(new Alert("Membership", "FearDubh", "", addSubAmount))
-    countdownAdditionsQueue.push(new Membership());
-}, 2000);
+    setTimeout(() => {
+        AlertQueue.push(new Alert("Membership", "FearDubh", "", addSubAmount))
+        countdownAdditionsQueue.push(new Membership());
+    }, 2000);
 
-setTimeout(() => {
-    AlertQueue.push(new Alert("SuperChatSticker", "Maxwellicus", "$2.50", addSuperChatAmount))
-    countdownAdditionsQueue.push(new SuperChat());
-}, 6000);
+    setTimeout(() => {
+        AlertQueue.push(new Alert("SuperChatSticker", "Maxwellicus", "$2.50", addSuperChatAmount))
+        countdownAdditionsQueue.push(new SuperChat());
+    }, 6000);
 
-setTimeout(() => {
-    AlertQueue.push(new Alert("SuperChat", "HelpThatGuy", "$20.00", addSuperChatAmount))
-    countdownAdditionsQueue.push(new SuperChat());
-}, 8000);
+    setTimeout(() => {
+        AlertQueue.push(new Alert("SuperChat", "HelpThatGuy", "$20.00", addSuperChatAmount))
+        countdownAdditionsQueue.push(new SuperChat());
+    }, 8000);
 
-setTimeout(() => {
-    AlertQueue.push(new Alert("Membership", "Togi", "", addSubAmount))
-    countdownAdditionsQueue.push(new Membership());
-}, 12000);
+    setTimeout(() => {
+        AlertQueue.push(new Alert("Membership", "Togi", "", addSubAmount))
+        countdownAdditionsQueue.push(new Membership());
+    }, 12000);
 }
 
 app.ws('/ws/alerts', function (ws, req) {
@@ -92,6 +120,12 @@ app.ws('/ws/alerts', function (ws, req) {
 
 //control the overlay
 app.ws('/ws/control', function (ws, req) {
+    //to add a new control type, create a new request type using the template below within the switch statement
+    /* 
+        case "MyCustomRequest":
+            DoMyThing();
+            break;
+    */
     ws.on('message', function (msg) {
         const data = JSON.parse(msg);
         switch (data.request) {
@@ -130,13 +164,13 @@ var LiveID = "";
 
 app.get('/', (req, res) => {
     if (!loaded)
-        res.sendFile(path.join(__dirname, "./index.html"))
+        res.sendFile(path.join(__dirname, "./pages/index.html"))
     else
-        res.sendFile(path.join(__dirname, "./status.html"))
+        res.sendFile(path.join(__dirname, "./pages/status.html"))
 })
 
 app.get('/overlay', (req, res) => {
-    res.sendFile(path.join(__dirname, "./overlay.html"))
+    res.sendFile(path.join(__dirname, "./pages/overlay.html"))
 })
 
 app.get('/alerts', (req, res) => {
@@ -145,12 +179,28 @@ app.get('/alerts', (req, res) => {
 
 app.get('/status', (req, res) => {
     if (loaded)
-        res.sendFile(path.join(__dirname, "./status.html"))
+        res.sendFile(path.join(__dirname, "./pages/status.html"))
     else
-        res.sendFile(path.join(__dirname, "./index.html"))
+        res.sendFile(path.join(__dirname, "./pages/index.html"))
 })
 
+//css
+app.get('/styles/index', (req, res) => {
+    res.sendFile(path.join(__dirname, "./styles/index.css"))
+})
+app.get('/styles/overlay', (req, res) => {
+    res.sendFile(path.join(__dirname, "./styles/overlay.css"))
+})
+app.get('/styles/alerts', (req, res) => {
+    res.sendFile(path.join(__dirname, "./styles/alerts.css"))
+})
+app.get('/styles/status', (req, res) => {
+    res.sendFile(path.join(__dirname, "./styles/status.css"))
+})
+
+
 app.post('/setup', (req, res) => {
+    //put pre-init things here
     print(chalk.magenta("Post for setup received! Starting the Memberthon Backend...."));
     res.redirect("/status");
     countDownDate = new Date(req.body.date);
@@ -167,16 +217,6 @@ app.listen(5653, () => {
         open("http://localhost:5653")
     print(chalk.green("Webserver Started!"));
 });
-
-async function open(url) {
-    const module = await import('open');
-    module.openApp(url);
-}
-
-function addMinutes(date, minutes) {
-    countDownDate = new Date(date.getTime() + minutes * 60000);
-}
-
 
 var failedStart = false;
 var failiureDetails = "None Available";
@@ -230,6 +270,9 @@ async function initServer() {
 
             return;
         }
+
+        // uncomment this to enable chat time additions
+
         //countdownAdditionsQueue.push(new Chat());
     })
 
@@ -293,6 +336,8 @@ async function StartCountdown() {
         // If the count down is finished
         if (distance < 0) {
             clearInterval(countDownInterval);
+            //add code here for countdown finish if you want :)
+            process.exit(0)
         }
     }, 1000);
 };
@@ -349,4 +394,16 @@ function PauseCountdown() {
         clearInterval(SaveInterval);
         clearInterval(countDownInterval)
     }
+}
+
+
+async function open(url) {
+    const module = await import('open');
+    module.openApp(url);
+}
+
+//adds "minutes" to the provided "date".
+//thanks to stack overflow for this one, my brain was retarded and i couldnt do the math
+function addMinutes(date, minutes) {
+    countDownDate = new Date(date.getTime() + minutes * 60000);
 }
