@@ -48,7 +48,7 @@ ENJOY!
 
 # Styling
 To style your overlays, you must use CSS!
-### To learn CSS go [HERE](https://www.w3schools.com/css/)!
+### To learn CSS go [HERE](https://www.w3schools.com/css/)! (its mega easy for the basics trust me)
 For custom fonts, i suggest using Google Fonts, and you need to use the @import method, shown below:<br>
 ![image](https://github.com/TOG11/Memberthon/assets/71170613/aa600b81-8187-481e-9985-ef1a607b27bb) <br>
 Copy the text from that box, put it at the top of the css where the other @imports are.<br>
